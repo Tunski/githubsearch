@@ -2,100 +2,112 @@ var viewModel= function(){
 
 	self = this;
 
+	//the user's search query
 	this.searchField = ko.observable('');
 
-	this.listViewLocations = ko.observableArray([]);
+	//this.gitHubUser = ko.observable(new User(testUser));
 
-	testUser = {
-		login:'Me',
-		followers: 6
-	}
+	this.githubUser = ko.observable('');
 
-	this.gitHubUser = ko.observable(new User(testUser));
-
-	//Create list view of locations
-	/*locations.forEach(function(location)
-	{
-		self.listViewLocations.push(location);
-		console.log(location.name);
-	});*/
-
-	//filter the locations to locations that match the user's text input
-	self.filterLocations = function()
-	{
-		var searchTerm = self.searchField().toLowerCase();
-		//console.log("The search term in lower is: " + searchTerm)
-
-		var tempLocs = locations.filter(function(location){
-
-  		if (location.name.toLowerCase().includes(searchTerm))
-  		{
-  			//console.log(location.name);
-  			return location.name;
-  		}
-		});
-		self.listViewLocations.removeAll();
-
-		tempLocs.forEach(function(location){
-			self.listViewLocations.push(location);
-		});
-
-		markers.forEach(function(marker)
-		{
-			if(!marker.title.toLowerCase().includes(searchTerm))
-				marker.setVisible(false);
-			else
-				marker.setVisible(true);
-
-		});
-
-	};
-
-	self.doSearch = function(username){
-		console.log('Making it');
-		//console.log(username + ' ' + 'Me');
-		//getGitHubUser2('Tunski');
-		getGitHubUser('Octocat');
+	self.doUserSearch = function(username){
+		if (username.length < 1)
+			return;
+		getGithubUser(username);
 	};
 
 	self.doNext = function(){
-
-		getUserFollowers('Octocat', 2);
+		self.pageTracker(1);
+		getUserFollowers(self.githubUser().userHandle(), self.githubUser().currentPage());
 	}
+
+	self.doPrev = function(){
+		self.pageTracker(-1);
+		getUserFollowers(self.githubUser().userHandle(), self.githubUser().currentPage());
+	}
+
+	self.allowPrev = ko.computed(function(){
+		var user = self.githubUser();
+		if (!user.currentPage)
+			return false;
+
+		if (user.currentPage() <= 1)
+			return false;
+
+		return true;
+	}, self);
+
+	self.allowNext = ko.computed(function(){
+		var user = self.githubUser();
+		if (!user.currentPage)
+			return false;
+
+		if (user.currentPage() >= user.lastPage())
+			return false;
+
+		return true;
+	}, self);
+
+	this.pageTracker = function(delta){
+		self.githubUser().currentPage(self.githubUser().currentPage() + delta);
+
+		if(self.githubUser().currentPage() <= 0)
+		{
+			self.githubUser().currentPage(0);
+		}
+		else if(self.githubUser().currentPage() >= self.githubUser().lastPage())
+		{
+			self.githubUser().currentPage(self.githubUser().lastPage());
+		}
+	};
 
 	self.loadUser = function(userInfo)
 	{
-		console.log('I am loading');
-		console.log(userInfo);
-		this.gitHubUser(new User(userInfo));
+		this.githubUser(new User(userInfo));
 	};
 
-	self.loadFollowers = function(followers)
+	self.loadFollowers = function(followersResponse)
 	{
+
+		var followers = followersResponse.data;
+
 		//clear the followers list
-		self.gitHubUser().followers([]);	
+		//TODO:implement data caching at some point
+		self.githubUser().followers([]);	
 
 		followers.forEach(function(follower){
-			self.gitHubUser().followers.push(follower);
+			self.githubUser().followers.push(follower);
 		});
-	};
 
+		//Need to find a way to only set the last page once
+		var meta = followersResponse.meta;
+		if (meta.Link)
+		{
+			console.log(meta.Link);
+
+			var lastPageUrl = meta.Link[1];
+
+			var value = getParameterValueFromURL('page', lastPageUrl);
+			//console.log('Page number: ' + value);
+
+			self.githubUser().lastPage(value);
+		}
+	};
 
 	function getUserFollowers(username, page)
 	{
 		$.ajax({
                  url: 'https://api.github.com/users/' + username+ '/followers?page=' + page,
                  dataType: 'jsonp',
-                 //data: data.sessionID
                  success: function(response){
                  	console.log(response);
-	          		self.loadFollowers(response.data);
+	          		//self.loadFollowers(response.data);
+	          		self.loadFollowers(response);
 	          }
              });
 
 	};
 
-	function getGitHubUser(username)
+	function getGithubUser(username)
 	{
 		//get user
 		$.ajax({
@@ -124,6 +136,14 @@ var viewModel= function(){
 
 };
 
+
+	/*
+	testUser = {
+		login:'Me',
+		followers: 6
+	}
+	*/
+
 //The user model
 var User = function(userInfo){
 	//console.log('userinfo   userinfo');
@@ -131,9 +151,11 @@ var User = function(userInfo){
 	this.userHandle = ko.observable(userInfo.login);
 	this.followerCount = ko.observable(userInfo.followers);
 	this.followers = ko.observableArray([]);
+	this.currentPage = ko.observable(1);
+	this.lastPage = ko.observable(1);
 }
 
-
+//Binding for enter key press
 ko.bindingHandlers.enterkey = {
     init: function (element, valueAccessor, allBindings, viewModel) {
         var callback = valueAccessor();

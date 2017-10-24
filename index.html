@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<title>Github Search Service</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="description" content="Github search service">
+		<meta name="description" content="A service to find user info in Github">
 		<!--link type="text/css" rel="stylesheet" href="css/style.css"-->
 	</head>
 	<body>
@@ -15,39 +15,35 @@
 					<h1>Github Search Service</h1>
 				</div>
 				<div>
-					<input id="search-field" type="text" placeholder="Type in a username" data-bind="textInput:searchField, valueUpdate:'afterkeydown', eventt: { keyup: doSearch }, enterkey: doSearch"></input>
-					<input id="search-button" type="button" value="Go" data-bind="click: doSearch"></input>
+					<input id="search-field" type="text" placeholder="Type in a username" data-bind="textInput:searchField, valueUpdate:'afterkeydown', enterkey: function(){doUserSearch(searchField())}"></input>
+					<button id="search-button" data-bind="click: function(){doUserSearch(searchField())}, enable: searchField().length>0?true:false">Go</button>
 				</div>
 			</div>
-			<div id="gitUser" data-bind="with: gitHubUser">
+			<div id="gitUser" data-bind="with: githubUser">
 		        <h2 id="gitUser-name" data-bind="text: userHandle"></h2>
-		        <h3 id="gitUser-followCount">Followers: <p data-bind="text: followerCount"></p> </h3>
+		        <h3 id="gitUser-followCount">Followers ( <span data-bind="text: followerCount"></span> )</h3>
 		        <div class="followers-menu">
 					<h5>Followers</h5>
 		            <ul class="followers" style="" data-bind="foreach: followers">
-		                <li class="follower" data-bind="text:$data.login, click:$parent.locateMarker"> 
+		                <li class="follower"> 
+		                	<img style="height:50px; width:50px;"alt="github user avatar" data-bind="attr: {src: $data.avatar_url}">
+		                	</img>
+		                	<div data-bind="text:$data.login">
+		                	</div>
 		                </li>
 		            </ul>
+
+		            <div>
+		            	<p><span data-bind="text: currentPage">1</span> of <span data-bind="text: lastPage">1</span></p>
+		            </div>
 				</div>
-				<button data-bind="click: $root.doPrev">Previous</button>
-				<button data-bind="click: $root.doNext">Next</button>
+				<button id="prevButton" data-bind="click: $root.doPrev, enable: $root.allowPrev">Previous</button>
+				<button id="nextButton" data-bind="click: $root.doNext, enable: $root.allowNext">Next</button>
 		    </div>
-
-			<!--Map Pane style="height:100%;left:362px;position:absolute;"-->
-			<div class="map-pane">
-				<!--div id="title_bar_map_pane" class="title_bar" style="height:0vh">
-				</div-->
-				<div id="map">
-
-				</div>
-			</div>
 		</div>
 		<script src="js/lib/knockout-3.4.2.js"></script>
 		<script src="js/lib/jquery-3.2.1.min.js"></script>
 		<script src="js/script.js"></script>
 		<script src="js/app.js"></script>
-		<!--script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=ADD_KEY&v=3&callback=initMap" onerror=handleGoogleApiError()>
-    	</script-->
 	</body>
 </html>
