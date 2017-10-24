@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Github Search Service</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Github search service">
+		<!--link type="text/css" rel="stylesheet" href="css/style.css"-->
+	</head>
+	<body>
+		<div class="container-main">
+			<!--Menu Pane -->
+			<div class="menu-pane">
+				<div id="title_bar_menu_pane" class="title_bar">
+					<h1>Github Search Service</h1>
+				</div>
+				<div>
+					<input id="search-field" type="text" placeholder="Type in a username" data-bind="textInput:searchField, valueUpdate:'afterkeydown', eventt: { keyup: doSearch }, enterkey: doSearch"></input>
+					<input id="search-button" type="button" value="Go" data-bind="click: doSearch"></input>
+				</div>
+			</div>
+			<div id="gitUser" data-bind="with: gitHubUser">
+		        <h2 id="gitUser-name" data-bind="text: userHandle"></h2>
+		        <h3 id="gitUser-followCount">Followers: <p data-bind="text: followerCount"></p> </h3>
+		        <div class="followers-menu">
+					<h5>Followers</h5>
+		            <ul class="followers" style="" data-bind="foreach: followers">
+		                <li class="follower" data-bind="text:$data.login, click:$parent.locateMarker"> 
+		                </li>
+		            </ul>
+				</div>
+				<button data-bind="click: $root.doPrev">Previous</button>
+				<button data-bind="click: $root.doNext">Next</button>
+		    </div>
+
+			<!--Map Pane style="height:100%;left:362px;position:absolute;"-->
+			<div class="map-pane">
+				<!--div id="title_bar_map_pane" class="title_bar" style="height:0vh">
+				</div-->
+				<div id="map">
+
+				</div>
+			</div>
+		</div>
+		<script src="js/lib/knockout-3.4.2.js"></script>
+		<script src="js/lib/jquery-3.2.1.min.js"></script>
+		<script src="js/script.js"></script>
+		<script src="js/app.js"></script>
+		<!--script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=ADD_KEY&v=3&callback=initMap" onerror=handleGoogleApiError()>
+    	</script-->
+	</body>
+</html>
