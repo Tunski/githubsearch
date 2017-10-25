@@ -47,8 +47,10 @@ The tests are integrated into the app in the development environment.  However, 
 	* Tests that search bar is visible
     * Tests that search bar button is disabled by default
 
-#### Other
+### Other
 The folder/files have been structured such that is allows for good separation of concerns (HTML, CSS, JavaScript, Unit Tests, etc).
+
+Implemented a responsive design with CSS so that the app works, looks good and has a user friendly layout on all device types.
 
 # Deployment
 The deployed code excludes unit test integrations. It has been minified to reduce file size and conserve bandwidth. The production code is packaged in the prodpackage folder. Deploy the contents of prodpackage to your server.
